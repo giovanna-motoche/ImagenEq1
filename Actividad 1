@@ -1,0 +1,106 @@
+f=imread('radiograph1.jpg');%Lee la imagen y la almacena en variable "f"
+
+figure(1); %Crea una figura
+subplot(2,2,1);%Hace una division en la figura de 2x2 y se pone el cursor fila 1 y columna 1
+imshow(f) %Se muestra la imagen 
+
+%%
+f=f(:,:,1);%Extrae el canal de los rojos (de escala RGB) y lo almacena en f
+subplot(2,2,2);%Selecionamos la fila 1 columna 2
+imshow(f)%Se muestra la imagen solo en canal rojo
+f=double(f)/255;%Pasamos los datos a doble precision y se normalizan para tener en punto flotante de 0 a 1
+subplot(2,2,3); % Seleccionamos la fila 2 columna 1 
+imshow(f)% Se muestra la imagen "double"
+
+%%
+f=imresize(f,0.25);% Redimencionamos la imagen a 1/4 de la imagen original
+figure(1);%Creamos la figura 1
+subplot(2,2,1);%Seleccionamos la fila 1 y columna 1
+imshow(f,[]);%Muestra la imagen redimensionada y escala las intensidades automaticamente
+subplot(2,2,2);%Seleccionamos la fila 1 y columna 2
+mesh(f)%Muestra en una malla en 3D las intensidades de 0 a 1 de cada pixel de la imagen 
+
+
+%% Convulocion con mancha de luz
+%h=fspecial('disk',10); %Se crea un disco como funcion de transferencia de tamaño 10x10
+h=fspecial('gaussian',21,5); %se crea una gausiana como funcion de transferencia de tamaño 21x21 y desviacion de 5 
+subplot(2,2,3);%selecionamos la fila 2 y columna 1
+mesh(h) %Graficamos en malla 3d la gausiana 
+g = conv2(f,h,'same');%Convoluciona la imagen y la funcion, y la devuelve del mismo tamaño 
+subplot(2,2,4);%Selecciona la columna 2 y fila 2
+imshow(g);%Se muestra la imagen en la columna 2 fila 2 de la figura
+
+
+%%
+sz=size(f);% Almacenamos el tamaño de 'f' en la variable sz
+h=fspecial('disk',10);%Se crea un disco como funcion de transferencia de tamaño 10x10
+delta = zeros(sz(1),sz(2));%Se crea una matriz de 0 del tamaño de 'sz'
+delta(int16(sz(1)/2),int16(sz(2)/2))=1;%se cambia el valor de 0 a 1 en las coordenadas divididas en la matriz de ceros
+delta(int16(sz(1)/3),int16(sz(2)/2))=1;%se cambia el valor de 0 a 1 en las coordenadas divididas en la matriz de ceros
+delta(int16(sz(1)/2),int16(sz(2)/3))=1;%se cambia el valor de 0 a 1 en las coordenadas divididas en la matriz de ceros
+delta(int16(sz(1)/3),int16(sz(2)/3))=1;%se cambia el valor de 0 a 1 en las coordenadas divididas en la matriz de ceros
+subplot(2,2,1);%Seleccionamos la columna 1 y fila 1
+imshow(delta,[])%Se muestra la imagen delta con la escala de colores ajustada automaticamente
+subplot(2,2,3);%Seleccionamos la columna 1 y fila 2
+mesh(h)% Muestra la malla en 3d de el disco 
+
+g=conv2(delta,h,'same');%Convoluciona delta y 'h' y la devuelve del mismo tamaño
+subplot(2,2,2);%Seleccionamos la columna 2 y fila 1
+imshow(g,[]) %Se muestra la convoluvion y ajusta la escala de colores automaticamente
+subplot(2,2,4);%Seleccionamos la columna 2 y fila 2
+mesh(g)%Se muestra en malla la concolucion en 3d
+
+
+
+%% Frecuencias espaciales
+
+sines = zeros(sz(1),sz(2));
+for (x=1:sz(1))
+    for (y=1:sz(2))
+        sines(y,x)=10*sin(y*0.1)*sin((x-y)*0.5);
+    end
+end
+subplot(2,2,1);
+imshow(sines)
+subplot(2,2,2);
+imshow(sines,[])
+
+subplot(2,2,3);
+mesh(sines)
+
+F=fft2(sines);
+
+subplot(2,2,4);
+imshow(fftshift(abs(F)),[]);
+
+%% con radiografia
+subplot(2,2,1);
+imshow(f,[]);
+
+F=fft2(f,sz(1),sz(2));
+h=fspecial('disk',10);
+H=fft2(h,sz(1),sz(2));
+G=F.*H;
+g=abs(ifft2(G));
+
+subplot(2,2,2);
+imshow(g,[]);
+
+G=F.*abs(H);
+g=abs(ifft2(G));
+subplot(2,2,3);
+imshow(g,[]);
+g2 = conv2(f,h,'same');
+
+subplot(2,2,4);
+imshow(g2,[]);
+
+
+subplot(2,2,4);
+imshow(log(fftshift(abs(F))),[]);
+
+subplot(2,2,2);
+imshow((fftshift(abs(H))),[]);
+
+subplot(2,2,3);
+mesh((fftshift(abs(H))));
