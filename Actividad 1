@@ -54,53 +54,51 @@ mesh(g)%Se muestra en malla la concolucion en 3d
 
 %% Frecuencias espaciales
 
-sines = zeros(sz(1),sz(2));
-for (x=1:sz(1))
-    for (y=1:sz(2))
-        sines(y,x)=10*sin(y*0.1)*sin((x-y)*0.5);
+sines = zeros(sz(1),sz(2)); %Se crea una matriz "sines" de tamaño sz1 y sz2 (El valor de sz es el tamaño de la funcion f) y se llenan con ceros
+for (x=1:sz(1)) %Se comienza un bucle que recorre las filas en el eje X de la matriz previamente creada
+    for (y=1:sz(2)) %Se comienza otro bucle que tambien recorre las filas de la matriz pero ahora en eje Y
+        sines(y,x)=10*sin(y*0.1)*sin((x-y)*0.5); %En cada iteración de los bucles anteriores, se calcula el valor de la matriz en la posición (y, x) mediante la multiplicación de dos funciones senoidales
     end
 end
-subplot(2,2,1);
-imshow(sines)
-subplot(2,2,2);
-imshow(sines,[])
+subplot(2,2,1); %Se crea un subplot de 2x2 y se posiciona en el primer subgráfico
+imshow(sines) %Muestra la matriz sines en el primer subgráfico.
+subplot(2,2,2); %Se mueve al segundo subgráfico
+imshow(sines,[]) %Muestra la matriz sines en el segundo subgráfico con una escala automática para mejorar la visualización
 
-subplot(2,2,3);
-mesh(sines)
+subplot(2,2,3); %Se mueve al tercer subgráfico
+mesh(sines) %Crea un gráfico en 3D mostrando la matriz sines como una superficie
 
-F=fft2(sines);
+F=fft2(sines); %Calcula la transformada de Fourier bidimensional de la matriz sines y la almacena en la variable F
 
-subplot(2,2,4);
-imshow(fftshift(abs(F)),[]);
+subplot(2,2,4); %Se mueve al cuarto subgráfico
+imshow(fftshift(abs(F)),[]); %Muestra la magnitud de la transformada de Fourier desplazada al centro en el cuarto subgráfico. La función abs se utiliza para obtener la magnitud y imshow con escala automática para mejorar la visualización
 
 %% con radiografia
-subplot(2,2,1);
-imshow(f,[]);
+subplot(2,2,1); %Se crea un subplot de 2x2 y se posiciona en el primer subgráfico.
+imshow(f,[]); %Muestra la imagen f en el primer subgráfico con escala automática
 
-F=fft2(f,sz(1),sz(2));
-h=fspecial('disk',10);
-H=fft2(h,sz(1),sz(2));
-G=F.*H;
-g=abs(ifft2(G));
+F=fft2(f,sz(1),sz(2)); %Calcula la transformada de Fourier bidimensional de la imagen f y la almacena en la variable F, con el tamaño especificado por sz(1) y sz(2)
+h=fspecial('disk',10); %Crea un filtro de disco de radio 10 utilizando la función fspecial y lo almacena en la variable h
+H=fft2(h,sz(1),sz(2)); %Calcula la transformada de Fourier bidimensional del filtro h y la almacena en la variable H, con el tamaño especificado por sz(1) y sz(2)
+G=F.*H; %Multiplica en el dominio de la frecuencia las transformadas de la imagen y del filtro, y almacena el resultado en G
+g=abs(ifft2(G)); % Calcula la transformada inversa de Fourier del resultado anterior y toma el valor absoluto para obtener la imagen filtrada, almacenada en g
 
-subplot(2,2,2);
-imshow(g,[]);
+subplot(2,2,2); %Se mueve al segundo subgráfico
+imshow(g,[]); %uestra la imagen filtrada en el segundo subgráfico con escala automática
 
-G=F.*abs(H);
-g=abs(ifft2(G));
-subplot(2,2,3);
-imshow(g,[]);
-g2 = conv2(f,h,'same');
+G=F.*abs(H); %Multiplica en el dominio de la frecuencia la transformada de la imagen por la magnitud de la transformada del filtro y almacena el resultado en G
+g=abs(ifft2(G)); %Calcula la transformada inversa de Fourier del resultado anterior y toma el valor absoluto para obtener otra imagen filtrada, almacenada en g
+subplot(2,2,3); %Se mueve al tercer subgráfico
+imshow(g,[]); %Muestra la segunda imagen filtrada en el tercer subgráfico con escala automática
+g2 = conv2(f,h,'same'); %Realiza una convolución 2D de la imagen f con el filtro h y almacena el resultado en g2
 
-subplot(2,2,4);
-imshow(g2,[]);
+subplot(2,2,4); %Se mueve al cuarto subgráfico
+imshow(g2,[]); %Muestra la imagen resultante de la convolución en el cuarto subgráfico con escala automática
 
+imshow(log(fftshift(abs(F))),[]); %Muestra el logaritmo de la magnitud de la transformada de Fourier de la imagen original desplazada al centro
 
-subplot(2,2,4);
-imshow(log(fftshift(abs(F))),[]);
+subplot(2,2,2); %Vuelve al segundo subgráfico
+imshow((fftshift(abs(H))),[]); %Muestra la magnitud de la transformada de Fourier del filtro desplazada al centro
 
-subplot(2,2,2);
-imshow((fftshift(abs(H))),[]);
-
-subplot(2,2,3);
-mesh((fftshift(abs(H))));
+subplot(2,2,3); %Vuelve al tercer subgráfico
+mesh((fftshift(abs(H)))); %Crea un gráfico en 3D mostrando la magnitud de la transformada de Fourier del filtro desplazada al centro
